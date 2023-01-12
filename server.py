@@ -6,8 +6,48 @@ HEADER_LENGTH = 10
 IP = "127.0.0.1"
 PORT = 1234
 
-users = {}
 ids = {}
+users = {}
+# modelo de usuario
+# users[aaaaaa] = {
+#     'name': 'joao da silva',
+#     'nick': 'jhon',
+#     'sala': [],
+#     'socket': aaaaa
+# }
+
+channels = {
+    'Conversa':{
+        'name': 'Conversa',
+        'users': []
+    },
+    'Trabalho': {
+        'name': 'Trabalho',
+        'users': []
+    }
+}
+
+def join(sala, user):
+    conected_users = channels[sala]['users']
+    current_user = users[user]
+
+    if current_user in conected_users:
+        print('User already connected!')
+        return 0
+
+    conected_users.append(current_user)
+
+    # current_user['sala'].append(sala)
+
+def quit(user):
+    current_user = users[user]
+    current_channel = channels[current_user['sala']]
+
+    current_channel['users'].remove(current_user)
+    current_user['sala'].remove(current_channel)
+
+
+
 
 # Create a socket
 # socket.AF_INET - address family, IPv4, some otehr possible are AF_INET6, AF_BLUETOOTH, AF_UNIX
@@ -47,7 +87,7 @@ def receive_message(client_socket):
         message_length = int(message_header.decode('utf-8').strip())
 
         return {'header': message_header, 'data': client_socket.recv(message_length)}
-        
+
     except:
         return False
 
