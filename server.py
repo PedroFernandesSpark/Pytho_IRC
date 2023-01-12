@@ -27,7 +27,23 @@ channels = {
     }
 }
 
-def join(sala, user):
+def process(message, user):
+    message.strip()
+    message.partition(' ')
+
+    cmd = message[0]
+    arg = message[2]
+
+    if cmd == 'JOIN':
+        join(user, arg)
+    if cmd == 'QUIT':
+        quit(user)
+    if cmd == 'PRIVMSG':
+        privmsg(message)
+    if cmd == 'NICK':
+        nick(user, arg)
+
+def join(user, sala):
     conected_users = channels[sala]['users']
     current_user = users[user]
 
@@ -46,8 +62,25 @@ def quit(user):
     current_channel['users'].remove(current_user)
     current_user['sala'].remove(current_channel)
 
+def privmsg(message):
+    msg = message["data"].decode("utf-8")[8:]
+    msg = msg.split()
+    alvo = msg[0]
+    mensagem = msg[1]
+    idDoAlvo = list(users.keys())[list(users.values()).index(alvo)]
+    print(f'Received private message from {users[user["data"].decode("utf-8")]}: {mensagem} para o usuario {idDoAlvo}')
+    mensagem = mensagem.encode("utf-8")
+    # Iterate over connected clients and broadcast message
+    for client_socket in clients:
 
+        # But don't sent it to sender
+        if client_socket == ids[idDoAlvo]:
+            print(f"{len(mensagem):<{HEADER_LENGTH}}".encode('utf-8'))
+            client_socket.send(user['header'] + users[user["data"].decode("utf-8")].encode("utf-8") + f"{len(mensagem):<{HEADER_LENGTH}}".encode('utf-8') + mensagem)
 
+def nick(user, nickname):
+    current_user = users[user]
+    current_user['nick'] = nickname
 
 # Create a socket
 # socket.AF_INET - address family, IPv4, some otehr possible are AF_INET6, AF_BLUETOOTH, AF_UNIX
